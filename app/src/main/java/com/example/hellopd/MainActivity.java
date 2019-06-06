@@ -1,12 +1,16 @@
 package com.example.hellopd;
 
+import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Switch;
+import android.widget.ToggleButton;
 
 import org.puredata.android.io.AudioParameters;
 import org.puredata.android.io.PdAudio;
@@ -22,10 +26,34 @@ public class MainActivity extends AppCompatActivity {
     EditText freqText;
     SeekBar freqSlider;
 
+    // Start, Pause, Stop for Beatles mp3 music:
+    MediaPlayer music_beatle;
+    int paused;
+    // code continues at bottom
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //play beatles.mp3 file using button:
+        final MediaPlayer beatleMusic = MediaPlayer.create(this, R.raw.the_beatles_yellow_submarine);
+
+        final ToggleButton play_beatles = (ToggleButton) findViewById(R.id.toggle_beatles);
+        play_beatles.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    beatleMusic.start();
+                    // The toggle is enabled
+                } else {
+                    beatleMusic.pause();
+                    // The toggle is disabled
+                }
+            }
+        });
+
+        // end of beatles insert
 
         try{
             initPD();
@@ -95,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
         int i = 0;
     }
 
-
     private PdUiDispatcher dispatcher;
 
     private void initPD() throws IOException {
@@ -119,4 +146,32 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         PdAudio.stopAudio();
     }
+
+    // Continued [Start, Pause, Stop for Beatles mp3 music]:
+
+    public void play(View view) {
+
+        if(music_beatle == null) {//only play when there's no sound (won't create multiple instances)
+            music_beatle = MediaPlayer.create(this, R.raw.the_beatles_yellow_submarine);
+            music_beatle.start();
+        } else if (! music_beatle.isPlaying()){//after pause (and not playing):
+            music_beatle.seekTo(paused);
+            music_beatle.start();
+        }
+    }
+
+    public void pause(View view) {
+        if(music_beatle != null) {// resolves "stop" -> "pause" bug
+            music_beatle.pause();
+            paused = music_beatle.getCurrentPosition(); //get position where paused
+        }
+    }
+
+    public void stop(View view) {
+        music_beatle.release();
+        music_beatle = null;
+    }
+
+    // End of [Start, Pause, Stop for Beatles mp3 music]
+
 }
