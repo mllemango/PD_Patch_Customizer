@@ -31,15 +31,42 @@ public class MainActivity extends AppCompatActivity {
     int paused;
     // code continues at bottom
 
+    private void loadPDPatch(){
+        File dir = getFilesDir();
+        try {
+            IoUtils.extractZipResource(getResources().openRawResource(R.raw.simplepatch), dir, true);
+            Log.i("unzipping", dir.getAbsolutePath());
+        } catch (IOException e) {
+            Log.i("unzipping", "error unzipping");
+        }
+        File pdPatch = new File(dir, "simplepatch.pd");
+        try {
+            PdBase.openPatch(pdPatch.getAbsolutePath());
+        } catch (IOException e) {
+            Log.i("opening patch", "error opening patch");
+            Log.i("opening patch", e.toString());
+        }
+
+        int i = 0;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        try{
+            initPD();
+            loadPDPatch();
+        }
+        catch (IOException e) {
+            Log.i("onCreate", "initialization and loading gone wrong :(");
+            finish();
+        }
+        initGUI();
+
         //play beatles.mp3 file using button:
         final MediaPlayer beatleMusic = MediaPlayer.create(this, R.raw.the_beatles_yellow_submarine);
-
         final ToggleButton play_beatles = (ToggleButton) findViewById(R.id.toggle_beatles);
         play_beatles.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -52,19 +79,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
         // end of beatles insert
-
-        try{
-            initPD();
-            loadPDPatch();
-        }
-        catch (IOException e) {
-            Log.i("onCreate", "initialization and loading gone wrong :(");
-            finish();
-        }
-
-        initGUI();
     }
 
     private void initGUI(){
@@ -104,24 +119,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void loadPDPatch(){
-        File dir = getFilesDir();
-        try {
-            IoUtils.extractZipResource(getResources().openRawResource(R.raw.simplepatch), dir, true);
-            Log.i("unzipping", dir.getAbsolutePath());
-        } catch (IOException e) {
-            Log.i("unzipping", "error unzipping");
-        }
-        File pdPatch = new File(dir, "simplepatch.pd");
-        try {
-            PdBase.openPatch(pdPatch.getAbsolutePath());
-        } catch (IOException e) {
-            Log.i("opening patch", "error opening patch");
-            Log.i("opening patch", e.toString());
-        }
-        
-        int i = 0;
-    }
+
 
     private PdUiDispatcher dispatcher;
 
@@ -131,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
 
         dispatcher = new PdUiDispatcher();
         PdBase.setReceiver(dispatcher);
-
     }
 
     @Override
