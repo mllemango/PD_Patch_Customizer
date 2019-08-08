@@ -6,6 +6,7 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextClock;
 import android.widget.TimePicker;
 
@@ -27,6 +28,9 @@ public class Alarm extends AppCompatActivity {
         alarmTime = findViewById(R.id.timePicker);
         currentTime = findViewById(R.id.textClock);
         final Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+
+        Log.d("currtime", currentTime.getText().toString());
+        Log.d("alrmtime", AlarmTime());
 
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -62,6 +66,9 @@ public class Alarm extends AppCompatActivity {
             stringAlarmTime = alarmHours.toString().concat(":").concat(stringAlarmMinutes).concat(" PM");
 
         } else { //AM
+            if (alarmHours == 0) {
+                alarmHours = 12; //12 am
+            }
             stringAlarmTime = alarmHours.toString().concat(":").concat(stringAlarmMinutes).concat(" AM");
         }
 
